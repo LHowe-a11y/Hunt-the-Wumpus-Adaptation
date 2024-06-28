@@ -3,8 +3,7 @@ import random
 # Defining classes
 
 class Room():
-    def __init__(self, code, robot, breach, name, description, item, adjacent):
-        self.robot = robot
+    def __init__(self, code, breach, name, description, item, adjacent):
         self.breach = breach
         self.name = name
         self.desc = description
@@ -150,26 +149,26 @@ ExamplePlayer = Player(0, set({}), 'Example desc')
 
 # Game Objects
 
-RoomOne = Room(1, False, False, 'Cafeteria', 'Description placeholder', None, {2, 5, 8})
-RoomTwo = Room(2, False, False, 'Ruined room', 'Description placeholder', None, {1, 3, 10})
-RoomThree = Room(3, False, False, 'Pipe corridor', 'Seemingly pointless backway full of pipes leaking steam', None, {2, 4, 12})
-RoomFour = Room(4, False, False, 'Living quarters', 'Description placeholder', None, {3, 5, 14})
-RoomFive = Room(5, False, False, 'Idea room', 'Description placeholder', None, {1, 4, 6})
-RoomSix = Room(6, False, False, 'Airlock', 'Description placeholder', None, {5, 7, 15})
-RoomSeven = Room(7, False, False, 'Barracks', 'Description placeholder', None, {6, 8, 17})
-RoomEight = Room(8, False, False, 'Procrastination room', 'Description placeholder', None, {1, 7, 9})
-RoomNine = Room(9, False, False, 'Caboose', 'Description placeholder', None, {8, 10, 18})
-RoomTen = Room(10, False, False, '', 'Description placeholder', None, {2, 9, 11})
-RoomEleven = Room(11, False, False, 'Storage', 'Description placeholder', None, {10, 12, 19})
-RoomTwelve = Room(12, False, False, 'Office', 'Description placeholder', None, {3, 11, 13})
-RoomThirteen = Room(13, False, False, 'Escape pod bay', 'Description placeholder', None, {12, 14, 20})
-RoomFourteen = Room(14, False, False, 'Cheese factory', 'Description placeholder', 'DeBrie', {4, 13, 15})
-RoomFifteen = Room(15, False, False, 'Grand hallway', 'Description placeholder', None, {6, 14, 16})
-RoomSixteen = Room(16, False, False, 'Server room', 'Description placeholder', None, {15, 17, 20})
-RoomSeventeen = Room(17, False, False, 'Office', 'Description placeholder', None, {7, 16, 18})
-RoomEighteen = Room(18, False, False, 'Medical bay', 'Description placeholder', None, {9, 17, 19})
-RoomNineteen = Room(19, False, False, 'Conference room', 'Description placeholder', None, {11, 18, 20})
-RoomTwenty = Room(20, False, False, 'Bridge', 'You have found your way to the bridge, the central command centre of the ship. A vast and sterile room, once bustling with activity, now swaddles your footsteps with deafening silence.', None, [13, 16, 19])
+RoomOne = Room(1, False, 'Cafeteria', 'Description placeholder', None, {2, 5, 8})
+RoomTwo = Room(2, False, 'Ruined room', 'Description placeholder', None, {1, 3, 10})
+RoomThree = Room(3, False, 'Pointless pipe corridor', 'Seemingly pointless backway full of pipes leaking steam', None, {2, 4, 12})
+RoomFour = Room(4, False, 'Living quarters', 'Description placeholder', None, {3, 5, 14})
+RoomFive = Room(5, False, 'Idea room', 'Description placeholder', None, {1, 4, 6})
+RoomSix = Room(6,  False, 'Airlock', 'Description placeholder', None, {5, 7, 15})
+RoomSeven = Room(7, False, 'Barracks', 'Description placeholder', None, {6, 8, 17})
+RoomEight = Room(8, False, 'Procrastination room', 'Description placeholder', None, {1, 7, 9})
+RoomNine = Room(9, False, 'Caboose', 'Description placeholder', None, {8, 10, 18})
+RoomTen = Room(10, False, '', 'Description placeholder', None, {2, 9, 11})
+RoomEleven = Room(11, False, 'Storage', 'Description placeholder', None, {10, 12, 19})
+RoomTwelve = Room(12, False, 'Office', 'Description placeholder', None, {3, 11, 13})
+RoomThirteen = Room(13, False, 'Escape pod bay', 'Description placeholder', None, {12, 14, 20})
+RoomFourteen = Room(14, False, 'Cheese factory', 'Description placeholder', 'DeBrie', {4, 13, 15})
+RoomFifteen = Room(15, False, 'Grand hallway', 'Description placeholder', None, {6, 14, 16})
+RoomSixteen = Room(16, False, 'Server room', 'Description placeholder', None, {15, 17, 20})
+RoomSeventeen = Room(17, False, 'Office', 'Description placeholder', None, {7, 16, 18})
+RoomEighteen = Room(18, False, 'Medical bay', 'Description placeholder', None, {9, 17, 19})
+RoomNineteen = Room(19, False, 'Conference room', 'Description placeholder', None, {11, 18, 20})
+RoomTwenty = Room(20, False, 'Bridge', 'You have found your way to the bridge, the central command centre of the ship. A vast and sterile room, once bustling with activity, now swaddles your footsteps with deafening silence.', None, [13, 16, 19])
 
 def forcemonstermove(): # Test and debug
     ExampleMonster.move()
@@ -179,12 +178,33 @@ def forcemonstermove(): # Test and debug
 # Main
 
 def main():
-    realplayer = Player(random.randint(1, 20), set({}), 'This is you')
-    variable = random.randint(1, 20)
-    while variable == realplayer.pos:
+    takenrooms = set({13})
+    realplayer = Player(random.randint(1, 20), set({}), 'This is you') # Creating player
+    takenrooms.add(realplayer.pos)
+    variable = random.randint(1, 20) 
+    while variable in takenrooms: # Making random variables to place enemies and hazards but not on top of the player
         variable = random.randint(1, 20)
+    realmonster = Monster(variable, None, False, 'This is the monster') # Creating monster
+    takenrooms.add(variable)
+    while variable in takenrooms:
+        variable = random.randint(1, 20)
+    securityrobotone = SecBot(variable, random.randint(1, 10), 'This is the first security robot') # Creating robots
+    takenrooms.add(variable)
+    while variable in takenrooms:
+        variable = random.randint(1, 20)
+    securityrobottwo = SecBot(variable, random.randint(11, 20), 'This is the second security robot')
+    takenrooms.add(variable)
+    while variable in takenrooms:
+        variable = random.randint(1, 20)
+    ExampleRoom.roomfinder(variable).breach = True # Creating hull breaches
+    takenrooms.add(variable)
+    while variable in takenrooms:
+        variable = random.randint(1, 20)
+    ExampleRoom.roomfinder(variable).breach = True
+    takenrooms.add(variable)
     
-    
+
+
 
 print('breakpoint')
 
