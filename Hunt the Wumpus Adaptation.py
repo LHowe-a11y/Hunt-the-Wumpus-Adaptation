@@ -202,8 +202,13 @@ def main():
         variable = random.randint(1, 20)
     ExampleRoom.roomfinder(variable).breach = True
     takenrooms.add(variable)
-    
-
+    while variable in takenrooms:
+        variable = random.randint(1, 20)
+    ExampleRoom.roomfinder(variable).item = 'Override key'
+    takenrooms.add(variable)
+    while variable in takenrooms:
+        variable = random.randint(1, 20)
+    ExampleRoom.roomfinder(variable).item = 'Energy cell'
 
 
 print('breakpoint')
