@@ -72,16 +72,30 @@ class Player(Character):
     def pickup(self): # This is to pickup items for a room
         x = ExampleRoom.roomfinder(self.pos)
         if x.item == None:
-            print('Nothing in inventory')
+            print('You look around, but there doesn\'t appear to be anything here.')
         else:
+            if x.item == 'DeBris':
+                if 'Cheese touch' in self.inv:
+                    print('Oh no... not again...')
             print('Picked up', x.item)
             self.inv.add(x.item)
             x.item = None
-
-            
+     
     def move(self, to): # This is to move to another room
-        # Maybe check if valid?
-        self.pos = int(to) # Rooms have a number code
+        if int(to) in ExampleRoom.roomfinder(self.pos).adj:
+            self.pos = int(to) # Rooms have a number code
+            return True
+        else:
+            return False
+
+    def invcheck(self): # This is to check what items the player has and show them
+        if 'Mouldy cheese' in self.inv:
+            print('You reach into your pocket and feel something gross. You quickly withdraw your hand, but the disgusting piece of mouldy, rotted cheese sticks to your fingers. You shake it off. Ew. Now your hand smells like cheese.\nCheese touch acquired.')
+            self.inv.remove('Mouldy cheese')
+            self.inv.add('Cheese touch')
+        print('You reach into your pocket and rummage around. You see what you pulled out:')
+        for item in self.inv:
+            print(item)
 
 class Monster(Character):
     def __init__(self, position, destination, awake, description):
@@ -128,7 +142,6 @@ class Monster(Character):
                 self.pos = nextmove4
             else:
                 self.pos = nextmove5
-
 
 class SecBot(Character):
     def __init__(self, position, destination, description):
@@ -178,8 +191,9 @@ def forcemonstermove(): # Test and debug
 # Main
 
 def main():
+    playername = input('Enter name: ')
     takenrooms = set({13})
-    realplayer = Player(random.randint(1, 20), set({}), 'This is you') # Creating player
+    realplayer = Player(random.randint(1, 20), set({'Mouldy cheese'}), 'This is you, '+playername) # Creating player
     takenrooms.add(realplayer.pos)
     variable = random.randint(1, 20) 
     while variable in takenrooms: # Making random variables to place enemies and hazards but not on top of the player
@@ -204,11 +218,26 @@ def main():
     takenrooms.add(variable)
     while variable in takenrooms:
         variable = random.randint(1, 20)
-    ExampleRoom.roomfinder(variable).item = 'Override key'
+    ExampleRoom.roomfinder(variable).item = 'Override key' # Creating items
     takenrooms.add(variable)
     while variable in takenrooms:
         variable = random.randint(1, 20)
     ExampleRoom.roomfinder(variable).item = 'Energy cell'
+    print('A ruined spacecraft, drifting through the dark, illuminated by fires behind glass, and riddled with holes.\nInside, a survivor blinks their eyes open, and pushes against the wall, slowly making their way up to standing.\nThis is you. And you have to escape.')
+    print('"I have to get to the escape pods! Hopefully they aren\'t destroyed. Let\'s see which rooms  I can move to..."')
+    while True:
+        print('Current position: '+str(realplayer.pos()))
+        for x in ExampleRoom.roomfinder(realplayer.pos).adj:
+            if ExampleRoom.roomfinder(x).breach == True:
+                adjbreach = True
+        if adjbreach == True:
+            print('"I feel a chill and hear a rush of air."')
+            adjbreach = False
+        if securityrobotone.pos in ExampleRoom.roomfinder(realplayer.pos).adj:
+            print('"I hear sparks and whirring motors."')
+        elif securityrobottwo.pos in ExampleRoom.roomfinder(realplayer.pos).adj:
+            print('"I hear sparks and whirring motors."')
+        print('What will you do?')
 
 
 print('breakpoint')
