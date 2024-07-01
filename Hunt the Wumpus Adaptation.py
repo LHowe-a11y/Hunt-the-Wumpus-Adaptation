@@ -84,7 +84,7 @@ class Player(Character):
     def move(self, to): # This is to move to another room
         if int(to) in ExampleRoom.roomfinder(self.pos).adj:
             self.pos = int(to) # Rooms have a number code
-            return True
+            # DO THIS TOO please :3
         else:
             return False
 
@@ -157,7 +157,7 @@ class SecBot(Character):
 ExampleCharacter = Character(0, 'Example desc')
 ExampleMonster = Monster(1, None, True, 'Example desc')
 ExampleSecBot = SecBot(0, 13, 'Example desc')
-ExampleRoom = Room(0, False, False, 'Example room', 'Example desc', 'Cheese touch', {1, 2, 3}) # CHEESE TOUCH
+ExampleRoom = Room(0, False, 'Example room', 'Example desc', 'Cheese touch', {1, 2, 3}) # CHEESE TOUCH
 ExamplePlayer = Player(0, set({}), 'Example desc')
 
 # Game Objects
@@ -181,7 +181,7 @@ RoomSixteen = Room(16, False, 'Server room', 'Description placeholder', None, {1
 RoomSeventeen = Room(17, False, 'Office', 'Description placeholder', None, {7, 16, 18})
 RoomEighteen = Room(18, False, 'Medical bay', 'Description placeholder', None, {9, 17, 19})
 RoomNineteen = Room(19, False, 'Conference room', 'Description placeholder', None, {11, 18, 20})
-RoomTwenty = Room(20, False, 'Bridge', 'You have found your way to the bridge, the central command centre of the ship. A vast and sterile room, once bustling with activity, now swaddles your footsteps with deafening silence.', None, [13, 16, 19])
+RoomTwenty = Room(20, False, 'Bridge', 'You have found your way to the bridge, the central command centre of the ship. A vast and sterile room, once bustling with activity, now swaddles your footsteps with deafening silence.', None, {13, 16, 19})
 
 def forcemonstermove(): # Test and debug
     ExampleMonster.move()
@@ -224,7 +224,7 @@ def main():
         variable = random.randint(1, 20)
     ExampleRoom.roomfinder(variable).item = 'Energy cell'
     print('A ruined spacecraft, drifting through the dark, illuminated by fires behind glass, and riddled with holes.\nInside, a survivor blinks their eyes open, and pushes against the wall, slowly making their way up to standing.\nThis is you. And you have to escape.')
-    print('"I have to get to the escape pods! Hopefully they aren\'t destroyed. Let\'s see which rooms  I can move to..."')
+    print('"I have to get to the escape pods! Hopefully they aren\'t destroyed. Let\'s see which rooms I can move to..."')
     while True:
         print('Current position: '+str(realplayer.pos()))
         for x in ExampleRoom.roomfinder(realplayer.pos).adj:
@@ -237,8 +237,24 @@ def main():
             print('"I hear sparks and whirring motors."')
         elif securityrobottwo.pos in ExampleRoom.roomfinder(realplayer.pos).adj:
             print('"I hear sparks and whirring motors."')
-        print('What will you do?')
+        if realmonster in ExampleRoom.roomfinder(realplayer.pos).adj:
+            print('"I hear distant footsteps from the vents."')
+        print('What will you do? [tip: type "help"]')
+        inpt = input('')
+        match inpt:
+            case 'help':
+                print('commands list') # Finish this please
+                input('Press enter to continue ')
+                continue
+            case 'move':
+                x = input('Where? ') # Working on this
+                if x == 'help':
+                    print('commands list') # Finish this please
+                    input('Press enter to continue ')
+                    continue
+
+
+
 
 
 print('breakpoint')
-
