@@ -84,9 +84,9 @@ class Player(Character):
     def move(self, to): # This is to move to another room
         if int(to) in ExampleRoom.roomfinder(self.pos).adj:
             self.pos = int(to) # Rooms have a number code
-            # DO THIS TOO please :3
+            moved = True
         else:
-            return False
+            moved = False
 
     def invcheck(self): # This is to check what items the player has and show them
         if 'Mouldy cheese' in self.inv:
@@ -149,8 +149,13 @@ class SecBot(Character):
         self.dest = destination
 
     def move(self):
+        y = 3
         for x in ExampleRoom.roomfinder(self.pos).adj:
             self.pos = x
+            if random.randint(1, y) == 1:
+                break
+            y = y - 1
+
 
 # Debugging Example Objects
 
@@ -187,6 +192,8 @@ def forcemonstermove(): # Test and debug
     ExampleMonster.move()
     print('Destination is: ' + str(ExampleMonster.dest))
     print('Position is: ' + str(ExampleMonster.pos))
+
+moved = True
 
 # Main
 
@@ -239,6 +246,9 @@ def main():
             print('"I hear sparks and whirring motors."')
         if realmonster in ExampleRoom.roomfinder(realplayer.pos).adj:
             print('"I hear distant footsteps from the vents."')
+        print('"I see signs on the walls, I think I can get to these rooms:')
+        for x in ExampleRoom.roomfinder(realplayer.pos).adj:
+            print(str(x))
         print('What will you do? [tip: type "help"]')
         inpt = input('')
         match inpt:
@@ -252,6 +262,17 @@ def main():
                     print('commands list') # Finish this please
                     input('Press enter to continue ')
                     continue
+                else:
+                    try:
+                        int(x)
+                    except:
+                        print('Invalid input')
+                        continue
+                    realplayer.move(x)
+                    if moved == False:
+                        print('"I can\'t get to that room from here."')
+                        continue
+                
 
 
 
