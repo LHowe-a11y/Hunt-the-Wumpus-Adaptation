@@ -272,6 +272,8 @@ def main():
                     if moved == False:
                         print('"I can\'t get to that room from here."')
                         continue
+            case 'inventory':
+                realplayer.invcheck()
                 
 
 
