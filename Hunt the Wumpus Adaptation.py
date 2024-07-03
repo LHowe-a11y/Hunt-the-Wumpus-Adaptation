@@ -65,18 +65,27 @@ class Character():
         self.desc = description
        
 class Player(Character):
-    def __init__(self, position, inventory, description):
+    def __init__(self, position, inventory, description, alive):
         Character.__init__(self, position, description)
         self.inv = inventory
+        self.alive = alive
 
-    def pickup(self): # This is to pickup items for a room
+    def pickup(self, monster): # This is to pickup items for a room
         x = ExampleRoom.roomfinder(self.pos)
         if x.item == None:
-            print('You look around, but there doesn\'t appear to be anything here.')
+            print('You look around, but there doesn\'t appear to be anything here. You\'re wasting time.')
         else:
             if x.item == 'DeBris':
                 if 'Cheese touch' in self.inv:
-                    print('Oh no... not again...')
+                    print('Looking down, you spot something on the floor... Oh no... not again...')
+            if x.item == 'Energy cell':
+                print('Out of the corner of your eye, you spot a faint glow from behind a vent, and notice an energy cell.\nYou try and pry the vent cover open, but it resists your tugs. With one huge heave and the scream of warping metal, you tear it off.\nYou\'ve got it, but a roar from the depths of the ship lets you know that your victory hasn\'t gone unnoticed.')
+                monster.dest = self.pos
+                monster.awake = True
+            if x.item == 'Override key':
+                print('You crane your neck to see over the shelf, and spy what looks like the override key for the escape pods, judging by the label.\nYou jump to pick it up, but while you\'re grabbing it, you knock a paint can over, starting a cascade.\nYou hear running footsteps start to get closer to you. You might want to get out of here.')
+                monster.dest = self.pos
+                monster.awake = True
             print('Picked up', x.item)
             self.inv.add(x.item)
             x.item = None
@@ -87,6 +96,16 @@ class Player(Character):
             moved = True
         else:
             moved = False
+    
+    def triggercheck(self, monster, sec1, sec2):
+        if ExampleRoom.roomfinder(self.pos).breach == True:
+            print('As soon as the door opens, you are sucked through it into the next room, and your body is lifelessly thrown into space throught the gaping hole in the hull.\nLuckily, you don\'t have to experience the air being pulled from your lungs as your blood boils and your vital organs freeze one by one.\nYou are dead.')
+            self.alive = False
+        if monster.pos == self.pos:
+            print('A noise overhead and a drop of liquid on your scalp makes you look up. You barely get to start moving your head before a hideous monster grabs you.\nYou spend your last moments wondering how you taste.\nYou are dead.')
+            self.alive = False
+        if sec1.pos == self.pos:
+            print('A security robot is hurtling towards you! Sparks are flying from exposed wires in its armour, it seems to be malfunctioning.\n"THREAT DETECTED" you hear, as it barrels towards you. You close your eyes, preparing for the worst, and you feel a pressure on your stomach as your thoughts go fuzzy and you pass out.\nYou wake up somewhere new, surprised to be alive and relatively unharmed.')
 
     def invcheck(self): # This is to check what items the player has and show them
         if 'Mouldy cheese' in self.inv:
@@ -163,7 +182,7 @@ ExampleCharacter = Character(0, 'Example desc')
 ExampleMonster = Monster(1, None, True, 'Example desc')
 ExampleSecBot = SecBot(0, 13, 'Example desc')
 ExampleRoom = Room(0, False, 'Example room', 'Example desc', 'Cheese touch', {1, 2, 3}) # CHEESE TOUCH
-ExamplePlayer = Player(0, set({}), 'Example desc')
+ExamplePlayer = Player(0, set({}), 'Example desc', True)
 
 # Game Objects
 
@@ -200,7 +219,7 @@ moved = True
 def main():
     playername = input('Enter name: ')
     takenrooms = set({13})
-    realplayer = Player(random.randint(1, 20), set({'Mouldy cheese'}), 'This is you, '+playername) # Creating player
+    realplayer = Player(random.randint(1, 20), set({'Mouldy cheese'}), 'This is you, '+playername, True) # Creating player
     takenrooms.add(realplayer.pos)
     variable = random.randint(1, 20) 
     while variable in takenrooms: # Making random variables to place enemies and hazards but not on top of the player
@@ -246,12 +265,19 @@ def main():
             print('"I hear sparks and whirring motors."')
         if realmonster in ExampleRoom.roomfinder(realplayer.pos).adj:
             print('"I hear distant footsteps from the vents."')
+            if random.randint(1,2) == 1:
+                print('The footsteps stop suddenly, and you can hear a low growl.')
+                realmonster.dest = realplayer.pos
         print('"I see signs on the walls, I think I can get to these rooms:')
         for x in ExampleRoom.roomfinder(realplayer.pos).adj:
             print(str(x))
+        if ExampleRoom.roomfinder(realplayer.pos).item == 'Energy cell':
+            print('"Is that something in the vent..?"')
+        if ExampleRoom.roomfinder(realplayer.pos).item == 'Override key':
+            print('"Something is glinting up on that shelf."')
         print('What will you do? [tip: type "help"]')
         inpt = input('')
-        match inpt:
+        match inpt.lower():
             case 'help':
                 print('commands list') # Finish this please
                 input('Press enter to continue ')
@@ -274,6 +300,13 @@ def main():
                         continue
             case 'inventory':
                 realplayer.invcheck()
+            case 'wait':
+                print('"I don\'t feel safe to move. I\'ll wait"')
+            case 'pickup':
+                realplayer.pickup(realmonster)
+        # Make monster move etc
+        
+        realmonster.move()
                 
 
 
