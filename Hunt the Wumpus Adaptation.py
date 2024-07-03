@@ -1,4 +1,6 @@
 import random
+import os
+import time
 
 # Defining classes
 
@@ -65,10 +67,14 @@ class Character():
         self.desc = description
        
 class Player(Character):
-    def __init__(self, position, inventory, description, alive):
+    def __init__(self, position, inventory, description, alive, cellused, keyused, seenpods, escaped):
         Character.__init__(self, position, description)
         self.inv = inventory
         self.alive = alive
+        self.cell = cellused
+        self.key = keyused
+        self.pods = seenpods
+        self.esc = escaped
 
     def pickup(self, monster): # This is to pickup items for a room
         x = ExampleRoom.roomfinder(self.pos)
@@ -90,7 +96,7 @@ class Player(Character):
             self.inv.add(x.item)
             x.item = None
      
-    def move(self, to): # This is to move to another room
+    def move(self, to, moved): # This is to move to another room
         if int(to) in ExampleRoom.roomfinder(self.pos).adj:
             self.pos = int(to) # Rooms have a number code
             moved = True
@@ -99,22 +105,57 @@ class Player(Character):
     
     def triggercheck(self, monster, sec1, sec2):
         if ExampleRoom.roomfinder(self.pos).breach == True:
+            clear()
             print('As soon as the door opens, you are sucked through it into the next room, and your body is lifelessly thrown into space throught the gaping hole in the hull.\nLuckily, you don\'t have to experience the air being pulled from your lungs as your blood boils and your vital organs freeze one by one.\nYou are dead.')
             self.alive = False
         if monster.pos == self.pos:
+            clear()
             print('A noise overhead and a drop of liquid on your scalp makes you look up. You barely get to start moving your head before a hideous monster grabs you.\nYou spend your last moments wondering how you taste.\nYou are dead.')
             self.alive = False
         if sec1.pos == self.pos:
             print('A security robot is hurtling towards you! Sparks are flying from exposed wires in its armour, it seems to be malfunctioning.\n"THREAT DETECTED" you hear, as it barrels towards you. You close your eyes, preparing for the worst, and you feel a pressure on your stomach as your thoughts go fuzzy and you pass out.\nYou wake up somewhere new, surprised to be alive and relatively unharmed.')
+            self.pos = sec1.dest
+        if sec2.pos == self.pos:
+            print('A security robot is hurtling towards you! Sparks are flying from exposed wires in its armour, it seems to be malfunctioning.\n"THREAT DETECTED" you hear, as it barrels towards you. You close your eyes, preparing for the worst, and you feel a pressure on your stomach as your thoughts go fuzzy and you pass out.\nYou wake up somewhere new, surprised to be alive and relatively unharmed.')
+            self.pos = sec2.dest
 
     def invcheck(self): # This is to check what items the player has and show them
         if 'Mouldy cheese' in self.inv:
             print('You reach into your pocket and feel something gross. You quickly withdraw your hand, but the disgusting piece of mouldy, rotted cheese sticks to your fingers. You shake it off. Ew. Now your hand smells like cheese.\nCheese touch acquired.')
             self.inv.remove('Mouldy cheese')
             self.inv.add('Cheese touch')
-        print('You reach into your pocket and rummage around. You see what you pulled out:')
+        print('You take some time to reach into your pocket and rummage around. You see what you pulled out:')
         for item in self.inv:
             print(item)
+
+    def escape(self):
+        if self.pos == 13:
+            if self.pods == False:
+                self.pods = True
+                print('You rush to get in an escape pod and get the heck out of this ship. But you cannot. The pods are broken.\n"This is fine, this is fine," you try not to panic, "I can fix the pods, if I just find the right materials."\nLooking more closely, you observe that only one escape pod looks like it isn\'t liable to explode on a whim.\nHowever, you can\'t get inside, since the door power is missing its energy cell, and the access keypad is now a hole full of rainbow spaghetti.')
+            if 'Energy cell' in self.inv:
+                print('You slot your energy cell into its designated slot in the nearby fusebox. The door power comes back on', end='')
+                if self.key == True:
+                    print('.')
+                elif 'Override key' in self.inv:
+                    print('.')
+                else:
+                    print(', but you still can\'t get through a locked door.')
+                self.cell = True
+                self.inv.remove('Energy cell')
+            if 'Override key' in self.inv:
+                if self.cell == False:
+                    print('You insert the override key into the keyhole at the top of the door, and it turns jankily, but nothing happens. There still isn\'t any power. Damn. You leave the key though')
+                elif self.cell == True:
+                    print('You insert the override key into the keyhole at the top of the door, and it turns in the lock like butter as the door squeals open.')
+                self.key = True
+            if self.key and self.cell == True:
+                print('This is it. You clamber into the escape pod, yank down the lever, smash the glass, and slam the button behind it. You hear a roar behind you and turn around to see... the Monster.\nIt lunges towards you, and just in time, the pod door slams shut. You are launched away from the ship, to... freedom?\nHopefully, someone finds and resuces you. You comfort yourself with the thought that anything is better than being on that ship.\nAs if on cue, an explosion tears through its hull, ripping it into even more pieces.\nAdrenaline wears off, and you feel tired. You activate the distress beacon, and slowly drift off... to sleep...')
+                self.escaped = True
+            else:
+                print('"I can\'t do anything more at the moment, I need to find something to let me in there!"')
+        else:
+            print('"I\'m not at the escape pod bay yet. I need to get there first.')
 
 class Monster(Character):
     def __init__(self, position, destination, awake, description):
@@ -167,9 +208,11 @@ class SecBot(Character):
         Character.__init__(self, position, description)
         self.dest = destination
 
-    def move(self):
+    def move(self, player):
         y = 3
         for x in ExampleRoom.roomfinder(self.pos).adj:
+            if x in ExampleRoom.roomfinder(player.pos).adj:
+                break
             self.pos = x
             if random.randint(1, y) == 1:
                 break
@@ -182,7 +225,7 @@ ExampleCharacter = Character(0, 'Example desc')
 ExampleMonster = Monster(1, None, True, 'Example desc')
 ExampleSecBot = SecBot(0, 13, 'Example desc')
 ExampleRoom = Room(0, False, 'Example room', 'Example desc', 'Cheese touch', {1, 2, 3}) # CHEESE TOUCH
-ExamplePlayer = Player(0, set({}), 'Example desc', True)
+ExamplePlayer = Player(0, set({}), 'Example desc', True, False, False, False, False)
 
 # Game Objects
 
@@ -213,13 +256,23 @@ def forcemonstermove(): # Test and debug
     print('Position is: ' + str(ExampleMonster.pos))
 
 moved = True
-
+print('Loading self tests...')
+windowsos = True
+try:
+    os.system('cls')
+except:
+    windowsos = False
+if windowsos == True:
+    clear = lambda : os.system('cls')
+elif windowsos == False:
+    clear = lambda : os.system('clear')
+playername = input('Enter name: ')
+clear()
 # Main
 
 def main():
-    playername = input('Enter name: ')
     takenrooms = set({13})
-    realplayer = Player(random.randint(1, 20), set({'Mouldy cheese'}), 'This is you, '+playername, True) # Creating player
+    realplayer = Player(random.randint(1, 20), set({'Mouldy cheese'}), 'This is you, '+playername, True, False, False, False, False) # Creating player
     takenrooms.add(realplayer.pos)
     variable = random.randint(1, 20) 
     while variable in takenrooms: # Making random variables to place enemies and hazards but not on top of the player
@@ -249,10 +302,311 @@ def main():
     while variable in takenrooms:
         variable = random.randint(1, 20)
     ExampleRoom.roomfinder(variable).item = 'Energy cell'
+    if True: # doing this so I can collapse it, it's the animation thing
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(3)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '----------------------------------------- . . . -----------------------------------------\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(1)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . _____  --^-^-^-^-^--  _____ . . . . . . . . . .  _____  --^-^-^-^-^--  _____  . . .\n'
+        '----- ___________   _   ___________ ----- . . . ----- ___________   _   ___________ -----\n'
+        '. . . . . . . . .  ---  . . . . . . . . . . . . . . . . . . . . .  ---  . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(1)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . _________ . . . . . . . . . . . . . . . . . . . _________ . . . . . . . .\n'
+        '. _____--------           --------_____ . . . . . _____--------           --------_____ .\n'
+        '<                 _____                 > . . . <                 _____                 >\n'
+        '.  -----  __    --_____--    __  -----  . . . . .  -----  __    --_____--    __  -----  .\n'
+        '. . . . . . . -- _______ -- . . . . . . . . . . . . . . . . . -- _______ -- . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(0.5)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . ____ ----------- ____ . . . . . . . . . . . . . ____ ----------- ____ . . . . .\n'
+        '. .__ ---                       ---____ . . . . . ____---                       --- __. .\n'
+        '<                _-----_                > . . . <                _-----_                >\n'
+        '. ---- __        -__o__-        __ ---- . . . . . ---- __        -__o__-        __ ---- .\n'
+        '. . . . . .-- ___       ___ --. . . . . . . . . . . . . . .-- ___       ___ --. . . . . .\n'
+        '. . . . . . . . . .---. . . . . . . . . . . . . . . . . . . . . . .---. . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(0.5)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . .  _______  . . . . . . . . . . . . . . . . . . .  _______  . . . . . . . .\n'
+        '. . . . __------         ------__ . . . . . . . . . . . __------         ------__ . . . .\n'
+        '.   _--                           --_   . . . . .   _--                           --_   .\n'
+        '._-                                   -_. . . . ._-                                   -_.\n'
+        '<                _ --- _                > . . . <                _ --- _                >\n'
+        '. -_            \   O   /            _- . . . . . -_            \   O   /            _- .\n'
+        '. . . -__         -----         __- . . . . . . . . . -__         -----         __- . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- . . . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(1)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . .  _______  . . . . . . . . . . . . . . . . . . .  _______  . . . . . . . .\n'
+        '. . . . __------         ------__ . . . . . . . . . . . __------         ------__ . . . .\n'
+        '.   _--                           --_   . . . . .   _--                           --_   .\n'
+        '._-                                   -_. . . . ._-                                   -_.\n'
+        '<                _ --- _                > . . . <                _ --- _                >\n'
+        '. -_            \   O   /            _- . . . . . -_            \   O   /          o _- .\n'
+        '. . . -__         -----         __- . . . . . . . . . -__         -----         __- . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- . . . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(2)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . .  _______  . . . . . . . . . . . . . . . . . . .  _______  . . . . . . . .\n'
+        '. . . . __------         ------__ . . . . . . . . . . . __------         ------__ . . . .\n'
+        '.   _--                           --_   . . . . .   _--                           --_   .\n'
+        '._-                                   -_. . . . ._-                                   -_.\n'
+        '<                _ --- _                > . . . <                _ --- _                >\n'
+        '. -_            \   O   /            _- . . . . . -_            \   O   /          O _- .\n'
+        '. . . -__         -----         __- . . . . . . . . . -__         -----         __- . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- . . . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(2)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . .  _______  . . . . . . . . . . . . . . . . . . .  _______  . . . . . . . .\n'
+        '. . . . . __---           ---__ . . . . . . . . . . . . . __---           ---__ . . . . .\n'
+        '. ____---                       ---____ . . . . . ____---                       ---____ .\n'
+        '<                _ --- _                > . . . <                _ --- _                >\n'
+        '. -_             -__o__-             _- . . . . . -_             -__o__-          /\ _- .\n'
+        '. . . -__                       __- . . . . . . . . . -__                       _(-_) . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- . . . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(2)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . .   ___  -------  ___   . . . . . . . . . . . . .   ___  -------  ___   . . . . .\n'
+        '.  ___   ---                 ---   ___  . . . . .  ___   ---                 ---   ___  .\n'
+        '<                                       > . . . <                                       >\n'
+        '. -_             _-----_             _- . . . . . -_             _-----_          ^  _- .\n'
+        '. . . -__        -__o__-        __- . . . . . . . . . -__        -__o__-        /_- \ . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___--|   * | . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . -___- . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(3)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . .   ___  -------  ___   . . . . . . . . . . . . .   ___  -------  ___   . . . . .\n'
+        '.  ___   ---                 ---   ___  . . . . .  ___   ---                 ---   ___  .\n'
+        '<                                       > . . . <                                       >\n'
+        '. -_             _-----_             _- . . . . . -_             _-----_             _- .\n'
+        '. . . -__        -__o__-        __- . . . . . . . . . -__        -__o__-         _^   . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- /   \  . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . .  |   * |  .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -___- . .\n')
+        time.sleep(0.1)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . .   ___  -------  ___   . . . . . . . . . . . . .   ___  -------  ___   . . . . .\n'
+        '.  ___   ---                 ---   ___  . . . . .  ___   ---                 ---   ___  .\n'
+        '<                                       > . . . <                                       >\n'
+        '. -_             _-----_             _- . . . . . -_             _-----_             _- .\n'
+        '. . . -__        -__o__-        __- . . . . . . . . . -__        -__o__-         _  . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___--   ^   . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . .   /  *\   .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  |     |  .\n')
+        time.sleep(0.1)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . .   ___  -------  ___   . . . . . . . . . . . . .   ___  -------  ___   . . . . .\n'
+        '.  ___   ---                 ---   ___  . . . . .  ___   ---                 ---   ___  .\n'
+        '<                                       > . . . <                                       >\n'
+        '. -_             _-----_             _- . . . . . -_             _-----_             _- .\n'
+        '. . . -__        -__o__-        __- . . . . . . . . . -__        -__o__-         _  . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- .   . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . .   ^   . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   /  *\   .\n')
+        time.sleep(0.1)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . .  _______  . . . . . . . . . . . . . . . . . . .  _______  . . . . . . . .\n'
+        '. . . . . __---           ---__ . . . . . . . . . . . . . __---           ---__ . . . . .\n'
+        '. ____---                       ---____ . . . . . ____---                       ---____ .\n'
+        '<                _ --- _                > . . . <                _ --- _                >\n'
+        '. -_             -__o__-             _- . . . . . -_             -__o__-             _- .\n'
+        '. . . -__                       __- . . . . . . . . . -__                       __- . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- . . . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . .   . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   ^   . .\n')
+        time.sleep(0.1)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . .  _______  . . . . . . . . . . . . . . . . . . .  _______  . . . . . . . .\n'
+        '. . . . . __---           ---__ . . . . . . . . . . . . . __---           ---__ . . . . .\n'
+        '. ____---                       ---____ . . . . . ____---                       ---____ .\n'
+        '<                _ --- _                > . . . <                _ --- _                >\n'
+        '. -_             -__o__-             _- . . . . . -_             -__o__-             _- .\n'
+        '. . . -__                       __- . . . . . . . . . -__                       __- . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- . . . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   . . .\n')
+        time.sleep(0.1)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . .  _______  . . . . . . . . . . . . . . . . . . .  _______  . . . . . . . .\n'
+        '. . . . . __---           ---__ . . . . . . . . . . . . . __---           ---__ . . . . .\n'
+        '. ____---                       ---____ . . . . . ____---                       ---____ .\n'
+        '<                _ --- _                > . . . <                _ --- _                >\n'
+        '. -_             -__o__-             _- . . . . . -_             -__o__-             _- .\n'
+        '. . . -__                       __- . . . . . . . . . -__                       __- . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- . . . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(3)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . .  _______  . . . . . . . . . . . . . . . . . . .  _______  . . . . . . . .\n'
+        '. . . . . __---           ---__ . . . . . . . . . . . . . __---           ---__ . . . . .\n'
+        '. ____---                       ---____ . . . . . ____---                       ---____ .\n'
+        '<                                       > . . . <                                       >\n'
+        '. -_             _ --- _             _- . . . . . -_             _ --- _             _- .\n'
+        '. . . -__        -__o__-        __- . . . . . . . . . -__        -__o__-        __- . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- . . . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(1)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . ____------____  . . . . . . . . . . . . . . . . ____------____  . . . . . .\n'
+        '. ____----                     ----____ . . . . . ____----                     ----____ .\n'
+        '<                                       > . . . <                                       >\n'
+        '. -_             _ --- _             _- . . . . . -_             _ --- _             _- .\n'
+        '. . . -__        -__o__-        __- . . . . . . . . . -__        -__o__-        __- . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- . . . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(0.5)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. _______---------     ---------_______ . . . . . _______---------     ---------_______ .\n'
+        '<                                       > . . . <                                       >\n'
+        '. -_             _ --- _             _- . . . . . -_             _ --- _             _- .\n'
+        '. . . -__        -__o__-        __- . . . . . . . . . -__        -__o__-        __- . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- . . . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(0.5)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. _____ . . . . . . . . . . . . . _____ . . . . . _____ . . . . . . . . . . . . . _____ .\n'
+        '<         -----___________ -----        > . . . <         -----___________ -----        >\n'
+        '. -_             _ --- _             _- . . . . . -_             _ --- _             _- .\n'
+        '. . . -__        -__o__-        __- . . . . . . . . . -__        -__o__-        __- . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- . . . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(2)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. _______---------     ---------_______ . . . . . _______---------     ---------_______ .\n'
+        '<                                       > . . . <                                       >\n'
+        '. -_             _ --- _             _- . . . . . -_             _ --- _             _- .\n'
+        '. . . -__        -__o__-        __- . . . . . . . . . -__        -__o__-        __- . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- . . . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(1)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . ____------____  . . . . . . . . . . . . . . . . ____------____  . . . . . .\n'
+        '. ____----                     ----____ . . . . . ____----                     ----____ .\n'
+        '<                _ --- _                > . . . <                _ --- _                >\n'
+        '. -_            \   O   /            _- . . . . . -_            \   O   /            _- .\n'
+        '. . . -__         -----         __- . . . . . . . . . -__         -----         __- . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- . . . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(2)
+        clear()
+        print('. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n'
+        '. . . . . . . .  _______  . . . . . . . . . . . . . . . . . . .  _______  . . . . . . . .\n'
+        '. . . . __------         ------__ . . . . . . . . . . . __------         ------__ . . . .\n'
+        '.   _--                           --_   . . . . .   _--                           --_   .\n'
+        '._-                ___                -_. . . . ._-                ___                -_.\n'
+        '<               /   O   \               > . . . <               /   O   \               >\n'
+        '. -_            \ _____ /            _- . . . . . -_            \ _____ /            _- .\n'
+        '. . . -__                       __- . . . . . . . . . -__                       __- . . .\n'
+        '. . . . . --___           ___-- . . . . . . . . . . . . . --___           ___-- . . . . .\n'
+        '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . . . . . .\n'
+        '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
+        time.sleep(5)
     print('A ruined spacecraft, drifting through the dark, illuminated by fires behind glass, and riddled with holes.\nInside, a survivor blinks their eyes open, and pushes against the wall, slowly making their way up to standing.\nThis is you. And you have to escape.')
     print('"I have to get to the escape pods! Hopefully they aren\'t destroyed. Let\'s see which rooms I can move to..."')
     while True:
-        print('Current position: '+str(realplayer.pos()))
+        n = str(realplayer.pos)
+        print('Current position: '+ str(realplayer.pos))
+        adjbreach = False
         for x in ExampleRoom.roomfinder(realplayer.pos).adj:
             if ExampleRoom.roomfinder(x).breach == True:
                 adjbreach = True
@@ -293,10 +647,12 @@ def main():
                         int(x)
                     except:
                         print('Invalid input')
+                        input('Press enter ')
                         continue
-                    realplayer.move(x)
+                    realplayer.move(x, moved)
                     if moved == False:
                         print('"I can\'t get to that room from here."')
+                        input('Press enter ')
                         continue
             case 'inventory':
                 realplayer.invcheck()
@@ -304,13 +660,34 @@ def main():
                 print('"I don\'t feel safe to move. I\'ll wait"')
             case 'pickup':
                 realplayer.pickup(realmonster)
-        # Make monster move etc
-        
+            case 'escape':
+                realplayer.escape()
+                if realplayer.esc == True:
+                    time.sleep(20)
+                    break
+                elif realplayer.esc == False:
+                    continue
+            case _:
+                print('Input not understood.')
+                input('Press enter ')
+                continue
+        realplayer.triggercheck(realmonster, securityrobotone, securityrobottwo) # This checks if you are dead or the bots get you
         realmonster.move()
-                
+        securityrobotone.move(realplayer)
+        securityrobottwo.move(realplayer)
+        realplayer.triggercheck(realmonster, securityrobotone, securityrobottwo)
+        if realplayer.alive == False:
+            time.sleep(10)
+            break
+    clear()
+    time.sleep(3)
+    print('...drifting through blackness...')
+    time.sleep(3)
+    clear()
+    time.sleep(3)
+    return
 
+input('Breakpoint')
 
-
-
-
-print('breakpoint')
+while True:
+    main()
