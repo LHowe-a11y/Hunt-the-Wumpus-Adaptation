@@ -67,7 +67,7 @@ class Character():
         self.desc = description
        
 class Player(Character):
-    def __init__(self, position, inventory, description, alive, cellused, keyused, seenpods, escaped):
+    def __init__(self, position, inventory, description, alive, cellused, keyused, seenpods, escaped, moved):
         Character.__init__(self, position, description)
         self.inv = inventory
         self.alive = alive
@@ -75,6 +75,7 @@ class Player(Character):
         self.key = keyused
         self.pods = seenpods
         self.esc = escaped
+        self.moved = moved
 
     def pickup(self, monster): # This is to pickup items for a room
         x = ExampleRoom.roomfinder(self.pos)
@@ -96,12 +97,12 @@ class Player(Character):
             self.inv.add(x.item)
             x.item = None
      
-    def move(self, to, moved): # This is to move to another room
+    def move(self, to): # This is to move to another room
         if int(to) in ExampleRoom.roomfinder(self.pos).adj:
             self.pos = int(to) # Rooms have a number code
-            moved = True
+            self.moved = True
         else:
-            moved = False
+            self.moved = False
     
     def triggercheck(self, monster, sec1, sec2):
         if ExampleRoom.roomfinder(self.pos).breach == True:
@@ -238,7 +239,7 @@ ExampleCharacter = Character(0, 'Example desc')
 ExampleMonster = Monster(1, None, True, 'Example desc')
 ExampleSecBot = SecBot(0, 13, 'Example desc')
 ExampleRoom = Room(0, False, 'Example room', 'Example desc', 'Cheese touch', {1, 2, 3}) # CHEESE TOUCH
-ExamplePlayer = Player(0, set({}), 'Example desc', True, False, False, False, False)
+ExamplePlayer = Player(0, set({}), 'Example desc', True, False, False, False, False, False)
 
 # Game Objects
 
@@ -281,7 +282,7 @@ clear()
 
 def main():
     takenrooms = set({13})
-    realplayer = Player(random.randint(1, 20), set({'Mouldy cheese'}), 'This is you, '+playername, True, False, False, False, False) # Creating player
+    realplayer = Player(random.randint(1, 20), set({'Mouldy cheese'}), 'This is you, '+playername, True, False, False, False, False, False) # Creating player
     takenrooms.add(realplayer.pos)
     variable = random.randint(1, 20) 
     while variable in takenrooms: # Making random variables to place enemies and hazards but not on top of the player
@@ -626,12 +627,12 @@ def main():
             print('"I hear sparks and whirring motors."')
         elif securityrobottwo.pos in ExampleRoom.roomfinder(realplayer.pos).adj:
             print('"I hear sparks and whirring motors."')
-        if realmonster in ExampleRoom.roomfinder(realplayer.pos).adj:
+        if realmonster.pos in ExampleRoom.roomfinder(realplayer.pos).adj:
             print('"I hear distant footsteps from the vents."')
             if random.randint(1,2) == 1:
                 print('The footsteps stop suddenly, and you can hear a low growl.')
                 realmonster.dest = realplayer.pos
-        print('"I see signs on the walls, I think I can get to these rooms:')
+        print('"I see signs on the walls, I think I can get to these rooms:"')
         for x in ExampleRoom.roomfinder(realplayer.pos).adj:
             print(str(x))
         if ExampleRoom.roomfinder(realplayer.pos).item == 'Energy cell':
@@ -657,16 +658,18 @@ def main():
                     except:
                         print('Invalid input')
                         input('Press enter ')
+                        clear()
                         continue
-                    realplayer.move(x, moved)
-                    if moved == False:
+                    realplayer.move(x)
+                    if realplayer.moved == False:
                         print('"I can\'t get to that room from here."')
                         input('Press enter ')
+                        clear()
                         continue
             case 'inventory':
                 realplayer.invcheck()
             case 'wait':
-                print('"I don\'t feel safe to move. I\'ll wait"')
+                print('"I don\'t feel safe to move. I\'ll wait."')
             case 'pickup':
                 realplayer.pickup(realmonster)
             case 'escape':
@@ -703,6 +706,6 @@ while True:
 
 '''Bugs
 
-Possible solutions implemented: monster teleporting across entire map
+Possible solutions implemented: Errors don't clear the screen.
 
-Unpatched: trying to move to wrong room doesn't trigger error message. Errors don't clear the screen.'''
+Unpatched:  '''
