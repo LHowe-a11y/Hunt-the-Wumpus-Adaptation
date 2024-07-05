@@ -67,8 +67,8 @@ class Character():
         self.dest = destination
        
 class Player(Character):
-    def __init__(self, position, inventory, alive, cellused, keyused, seenpods, escaped, moved):
-        Character.__init__(self, position)
+    def __init__(self, position, inventory, alive, cellused, keyused, seenpods, escaped, moved, destination):
+        Character.__init__(self, position, destination)
         self.inv = inventory
         self.alive = alive
         self.cell = cellused
@@ -229,26 +229,26 @@ ExampleRoom = Room(0, False, 'Example room', 'Example desc', 'Cheese touch', {1,
 
 # Game Objects
 
-RoomOne = Room(1, False, 'the cafeteria', 'This is the cafeteria. Half-eaten meals are scattered all over the floor, but there is no sign of life, or even death, that you see.', None, {2, 5, 8})
-RoomTwo = Room(2, False, 'a ruined room', 'This room is ruined. Completely destroyed. You have no idea what is was once used for. Probably for the best.', None, {1, 3, 10})
-RoomThree = Room(3, False, 'that pointless pipe corridor', 'You\'ve managed to find that seemingly pointless backway full of pipes leaking steam which is such a hallmark of any media.\n  It\'s so cliche you half expect to get jumpscared by a burst of steam.', None, {2, 4, 12})
-RoomFour = Room(4, False, 'living quarters', 'You are now in some living quarters. Looking past a flipped pool table, you wonder why anyone would disembowel a poor defenceless couch like that.', None, {3, 5, 14})
-RoomFive = Room(5, False, 'the idea room', 'Ah, this is the ideas room. People brainstorm things here. You have the idea that you better keep moving.', None, {1, 4, 6})
-RoomSix = Room(6,  False, 'an airlock', 'You are currently next to a sketchy looking airlock door.', None, {5, 7, 15})
-RoomSeven = Room(7, False, 'the barracks', 'These are the barracks, where soldiers are trained... Wonder where they\'ve gone.', None, {6, 8, 17})
-RoomEight = Room(8, False, 'the procrastination room', '[Description placeholder]', None, {1, 7, 9})
-RoomNine = Room(9, False, 'the caboose', 'Apparently, a caboose is a place on a ship. You learn something new every day.', None, {8, 10, 18})
-RoomTen = Room(10, False, 'a public bathroom', 'Ew. This is a bathroom.', None, {2, 9, 11})
-RoomEleven = Room(11, False, 'storage', 'You look around at the contents of this storage room.', None, {10, 12, 19})
-RoomTwelve = Room(12, False, 'an office', 'You step into a drab, boring office.', None, {3, 11, 13})
-RoomThirteen = Room(13, False, 'the escape pod bay', 'Yes! This is it! The escape pod bay! Now we just need to get out of here! Come on, let\'s go!', None, {12, 14, 20})
+RoomOne = Room(1, False, 'The cafeteria', 'This is the cafeteria. Half-eaten meals are scattered all over the floor, but there is no sign of life, or even death, that you see.', None, {2, 5, 8})
+RoomTwo = Room(2, False, 'A ruined room', 'This room is ruined. Completely destroyed. You have no idea what is was once used for. Probably for the best.', None, {1, 3, 10})
+RoomThree = Room(3, False, 'That pointless pipe corridor', 'You\'ve managed to find that seemingly pointless backway full of pipes leaking steam which is such a hallmark of any media.\n  It\'s so cliche you half expect to get jumpscared by a burst of steam.', None, {2, 4, 12})
+RoomFour = Room(4, False, 'Living quarters', 'You are now in some living quarters. Looking past a flipped pool table, you wonder why anyone would disembowel a poor defenceless couch like that.', None, {3, 5, 14})
+RoomFive = Room(5, False, 'The idea room', 'Ah, this is the ideas room. People brainstorm things here. You have the idea that you better keep moving.', None, {1, 4, 6})
+RoomSix = Room(6,  False, 'An airlock', 'You are currently next to a sketchy looking airlock door.', None, {5, 7, 15})
+RoomSeven = Room(7, False, 'The barracks', 'These are the barracks, where soldiers are trained... Wonder where they\'ve gone.', None, {6, 8, 17})
+RoomEight = Room(8, False, 'The procrastination room', '[Description placeholder]', None, {1, 7, 9})
+RoomNine = Room(9, False, 'The caboose', 'Apparently, a caboose is a place on a ship. You learn something new every day.', None, {8, 10, 18})
+RoomTen = Room(10, False, 'A public bathroom', 'Ew. This is a bathroom.', None, {2, 9, 11})
+RoomEleven = Room(11, False, 'Storage', 'You look around at the contents of this storage room.', None, {10, 12, 19})
+RoomTwelve = Room(12, False, 'An office', 'You step into a drab, boring office.', None, {3, 11, 13})
+RoomThirteen = Room(13, False, 'The escape pod bay', 'Yes! This is it! The escape pod bay! Now we just need to get out of here! Come on, let\'s go!', None, {12, 14, 20})
 RoomFourteen = Room(14, False, 'The Cheese Factory', 'You are in the most famous part of the ship. A grand, looming, ominous industrial factory, the air thick with the sickening stench of melting cheese.\n  Even while the ship falls apart, the cheese factory still stands, making cheese as ever it does.', 'DeBrie', {4, 13, 15})
-RoomFifteen = Room(15, False, 'a grand hallway', 'This... is the biggest, most impressive, grandiose hallway you have ever seen. Why? It\'s just a hallway.', None, {6, 14, 16})
-RoomSixteen = Room(16, False, 'the server room', 'Welcome to the server room. On your left, you can see the crushed computers. On the right, you\'ll find a row of burning devices.', None, {15, 17, 20})
+RoomFifteen = Room(15, False, 'A grand hallway', 'This... is the biggest, most impressive, grandiose hallway you have ever seen. Why? It\'s just a hallway.', None, {6, 14, 16})
+RoomSixteen = Room(16, False, 'The server room', 'Welcome to the server room. On your left, you can see the crushed computers. On the right, you\'ll find a row of burning devices.', None, {15, 17, 20})
 RoomSeventeen = Room(17, False, 'An office', 'You step into a drab, boring office.', None, {7, 16, 18})
-RoomEighteen = Room(18, False, 'the medical bay', 'You pause, momentarily, to consider healing yourself in the medbay. Alas, no time.', None, {9, 17, 19})
-RoomNineteen = Room(19, False, 'a conference room', 'This is where important people dressed in suits talk about this, and display powerpoint presentations of green and red arrows. At least, usually.', None, {11, 18, 20})
-RoomTwenty = Room(20, False, 'the bridge', 'You have found your way to the bridge, the central command centre of the ship. A vast and sterile room, once bustling with activity, now swaddles your footsteps with deafening silence.', None, {13, 16, 19})
+RoomEighteen = Room(18, False, 'The medical bay', 'You pause, momentarily, to consider healing yourself in the medbay. Alas, no time.', None, {9, 17, 19})
+RoomNineteen = Room(19, False, 'A conference room', 'This is where important people dressed in suits talk about this, and display powerpoint presentations of green and red arrows. At least, usually.', None, {11, 18, 20})
+RoomTwenty = Room(20, False, 'The bridge', 'You have found your way to the bridge, the central command centre of the ship. A vast and sterile room, once bustling with activity, now swaddles your footsteps with deafening silence.', None, {13, 16, 19})
 
 moved = True
 print('Loading self tests...')
@@ -268,7 +268,7 @@ def main():
         rume.item = None
     RoomFourteen.item = 'DeBrie'
     takenrooms = set({13, 14})
-    realplayer = Player(random.randint(1, 20), set({'Mouldy cheese'}), True, False, False, False, False, False) # Creating player
+    realplayer = Player(random.randint(1, 20), set({'Mouldy cheese'}), True, False, False, False, False, False, None) # Creating player
     takenrooms.add(realplayer.pos)
     variable = random.randint(1, 20) 
     while variable in takenrooms: # Making random variables to place enemies and hazards but not on top of the player
