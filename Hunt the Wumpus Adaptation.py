@@ -696,9 +696,3 @@ def main():
 
 while True:
     main()
-
-'''Bugs
-
-Possible solutions implemented: Not being warned of secbot
-
-Unpatched: '''
