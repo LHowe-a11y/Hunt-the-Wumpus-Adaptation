@@ -62,13 +62,13 @@ class Room():
                 return None
 
 class Character():
-    def __init__(self, position, description):
+    def __init__(self, position, destination):
         self.pos = position
-        self.desc = description
+        self.dest = destination
        
 class Player(Character):
-    def __init__(self, position, inventory, description, alive, cellused, keyused, seenpods, escaped, moved):
-        Character.__init__(self, position, description)
+    def __init__(self, position, inventory, alive, cellused, keyused, seenpods, escaped, moved):
+        Character.__init__(self, position)
         self.inv = inventory
         self.alive = alive
         self.cell = cellused
@@ -160,9 +160,8 @@ class Player(Character):
             print('"I\'m not at the escape pod bay yet. I need to get there first.')
 
 class Monster(Character):
-    def __init__(self, position, destination, awake, description):
-        Character.__init__(self, position, description)
-        self.dest = destination
+    def __init__(self, position, destination, awake):
+        Character.__init__(self, position, destination)
         self.awake = awake
 
     def move(self): # Pathfinding! (Nested if statements meh but it's efficient since the path is so simple) Resetting destination after reaching it doesn't work right now.
@@ -210,9 +209,8 @@ class Monster(Character):
                 self.pos = nextmove5
 
 class SecBot(Character):
-    def __init__(self, position, destination, description):
-        Character.__init__(self, position, description)
-        self.dest = destination
+    def __init__(self, position, destination):
+        Character.__init__(self, position, destination)
 
     def move(self, player):
         y = 3
@@ -225,13 +223,9 @@ class SecBot(Character):
             y = y - 1
 
 
-# Debugging Example Objects
+# Example room is not redundant although not used for debugging
 
-ExampleCharacter = Character(0, 'Example desc')
-ExampleMonster = Monster(1, None, True, 'Example desc')
-ExampleSecBot = SecBot(0, 13, 'Example desc')
 ExampleRoom = Room(0, False, 'Example room', 'Example desc', 'Cheese touch', {1, 2, 3}) # CHEESE TOUCH
-ExamplePlayer = Player(0, set({}), 'Example desc', True, False, False, False, False, False)
 
 # Game Objects
 
@@ -256,11 +250,6 @@ RoomEighteen = Room(18, False, 'the medical bay', 'You pause, momentarily, to co
 RoomNineteen = Room(19, False, 'a conference room', 'This is where important people dressed in suits talk about this, and display powerpoint presentations of green and red arrows. At least, usually.', None, {11, 18, 20})
 RoomTwenty = Room(20, False, 'the bridge', 'You have found your way to the bridge, the central command centre of the ship. A vast and sterile room, once bustling with activity, now swaddles your footsteps with deafening silence.', None, {13, 16, 19})
 
-def forcemonstermove(): # Test and debug
-    ExampleMonster.move()
-    print('Destination is: ' + str(ExampleMonster.dest))
-    print('Position is: ' + str(ExampleMonster.pos))
-
 moved = True
 print('Loading self tests...')
 windowsos = True
@@ -279,20 +268,20 @@ def main():
         rume.item = None
     RoomFourteen.item = 'DeBrie'
     takenrooms = set({13, 14})
-    realplayer = Player(random.randint(1, 20), set({'Mouldy cheese'}), 'This is you, '+playername, True, False, False, False, False, False) # Creating player
+    realplayer = Player(random.randint(1, 20), set({'Mouldy cheese'}), True, False, False, False, False, False) # Creating player
     takenrooms.add(realplayer.pos)
     variable = random.randint(1, 20) 
     while variable in takenrooms: # Making random variables to place enemies and hazards but not on top of the player
         variable = random.randint(1, 20)
-    realmonster = Monster(variable, None, False, 'This is the monster') # Creating monster
+    realmonster = Monster(variable, None, False) # Creating monster
     takenrooms.add(variable)
     while variable in takenrooms:
         variable = random.randint(1, 20)
-    securityrobotone = SecBot(variable, random.randint(1, 10), 'This is the first security robot') # Creating robots
+    securityrobotone = SecBot(variable, random.randint(1, 10)) # Creating robots
     takenrooms.add(variable)
     while variable in takenrooms:
         variable = random.randint(1, 20)
-    securityrobottwo = SecBot(variable, random.randint(11, 20), 'This is the second security robot')
+    securityrobottwo = SecBot(variable, random.randint(11, 20))
     takenrooms.add(variable)
     while variable in takenrooms:
         variable = random.randint(1, 20)
