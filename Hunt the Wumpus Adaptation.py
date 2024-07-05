@@ -160,9 +160,8 @@ class Player(Character):
             print('"I\'m not at the escape pod bay yet. I need to get there first.')
 
 class Monster(Character):
-    def __init__(self, position, destination, awake):
+    def __init__(self, position, destination):
         Character.__init__(self, position, destination)
-        self.awake = awake
 
     def move(self): # Pathfinding! (Nested if statements meh but it's efficient since the path is so simple) Resetting destination after reaching it doesn't work right now.
         if self.pos == self.dest:
@@ -252,7 +251,6 @@ RoomTwenty = Room(20, False, 'The bridge', 'You have found your way to the bridg
 
 moved = True
 print('Loading self tests...')
-windowsos = True
 if os.name == 'nt':
     clear = lambda : os.system('cls')
 else:
@@ -273,7 +271,7 @@ def main():
     variable = random.randint(1, 20) 
     while variable in takenrooms: # Making random variables to place enemies and hazards but not on top of the player
         variable = random.randint(1, 20)
-    realmonster = Monster(variable, None, False) # Creating monster
+    realmonster = Monster(variable, None) # Creating monster
     takenrooms.add(variable)
     while variable in takenrooms:
         variable = random.randint(1, 20)
