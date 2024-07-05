@@ -152,7 +152,7 @@ class Player(Character):
                     print('You insert the override key into the keyhole at the top of the door, and it turns in the lock like butter as the door squeals open.')
                 self.key = True
             if self.key and self.cell == True:
-                print('This is it. You clamber into the escape pod, yank down the lever, smash the glass, and slam the button behind it. You hear a roar behind you and turn around to see... the Monster.\nIt lunges towards you, and just in time, the pod door slams shut. You are launched away from the ship, to... freedom?\nHopefully, someone finds and resuces you. You comfort yourself with the thought that anything is better than being on that ship.\nAs if on cue, an explosion tears through its hull, ripping it into even more pieces.\nAdrenaline wears off, and you feel tired. You activate the distress beacon, and slowly drift off... to sleep...')
+                print('This is it. You clamber into the escape pod, yank down the lever, smash the glass, and slam the button behind it. You hear a roar behind you and turn around to see... the Monster.\nIt lunges towards you, and just in time, the pod door slams shut. You are launched away from the ship, to... freedom?\nHopefully, someone finds and resuces you. You comfort yourself with the thought that anything is better than being on that ship.\nAs if on cue, an explosion tears through its hull, ripping it into even more pieces.\nAdrenaline wears off, and you feel tired. You activate the distress beacon, and '+playername+' slowly drifts off... to sleep...')
                 self.escaped = True
             else:
                 print('"I can\'t do anything more at the moment, I need to find something to let me in there!"')
@@ -178,9 +178,7 @@ class Monster(Character):
             for x in (ExampleRoom.roomfinder(self.pos)).adj:
                 for y in (ExampleRoom.roomfinder(x)).adj: # If destination is adjacent to adjacent room, go to that near room
                     if self.dest == y: 
-                        print('Monster moved from: ' + str(self.pos))
                         self.pos = x
-                        print('To: ' + str(self.pos))
                         monstermoved = True
                         break
                     else:
@@ -205,17 +203,11 @@ class Monster(Character):
             if monstermoved == True:
                 return
             if nextmove3 != None:
-                print('Monster moved from: ' + str(self.pos))
                 self.pos = nextmove3
-                print('To: ' + str(self.pos))
             elif nextmove4 != None:
-                print('Monster moved from: ' + str(self.pos))
                 self.pos = nextmove4
-                print('To: ' + str(self.pos))
             else:
-                print('Monster moved from: ' + str(self.pos))
                 self.pos = nextmove5
-                print('To: ' + str(self.pos))
 
 class SecBot(Character):
     def __init__(self, position, destination, description):
@@ -225,7 +217,7 @@ class SecBot(Character):
     def move(self, player):
         y = 3
         for x in ExampleRoom.roomfinder(self.pos).adj:
-            if x in ExampleRoom.roomfinder(player.pos).adj:
+            if x == player.pos:
                 break
             self.pos = x
             if random.randint(1, y) == 1:
@@ -245,23 +237,23 @@ ExamplePlayer = Player(0, set({}), 'Example desc', True, False, False, False, Fa
 
 RoomOne = Room(1, False, 'the cafeteria', 'This is the cafeteria. Half-eaten meals are scattered all over the floor, but there is no sign of life, or even death, that you see.', None, {2, 5, 8})
 RoomTwo = Room(2, False, 'a ruined room', 'This room is ruined. Completely destroyed. You have no idea what is was once used for. Probably for the best.', None, {1, 3, 10})
-RoomThree = Room(3, False, 'that pointless pipe corridor', 'You\'ve managed to find that seemingly pointless backway full of pipes leaking steam which is such a hallmark of any media.\nIt\'s so cliche you half expect to get jumpscared by a burst of steam.', None, {2, 4, 12})
+RoomThree = Room(3, False, 'that pointless pipe corridor', 'You\'ve managed to find that seemingly pointless backway full of pipes leaking steam which is such a hallmark of any media.\n  It\'s so cliche you half expect to get jumpscared by a burst of steam.', None, {2, 4, 12})
 RoomFour = Room(4, False, 'living quarters', 'You are now in some living quarters. Looking past a flipped pool table, you wonder why anyone would disembowel a poor defenceless couch like that.', None, {3, 5, 14})
 RoomFive = Room(5, False, 'the idea room', 'Ah, this is the ideas room. People brainstorm things here. You have the idea that you better keep moving.', None, {1, 4, 6})
-RoomSix = Room(6,  False, 'an airlock', 'Description placeholder', None, {5, 7, 15})
-RoomSeven = Room(7, False, 'the barracks', 'Description placeholder', None, {6, 8, 17})
-RoomEight = Room(8, False, 'the procrastination room', 'Description placeholder', None, {1, 7, 9})
-RoomNine = Room(9, False, 'the caboose', 'Description placeholder', None, {8, 10, 18})
-RoomTen = Room(10, False, 'a public bathroom', 'Description placeholder', None, {2, 9, 11})
-RoomEleven = Room(11, False, 'storage', 'Description placeholder', None, {10, 12, 19})
-RoomTwelve = Room(12, False, 'an office', 'Description placeholder', None, {3, 11, 13})
+RoomSix = Room(6,  False, 'an airlock', 'You are currently next to a sketchy looking airlock door.', None, {5, 7, 15})
+RoomSeven = Room(7, False, 'the barracks', 'These are the barracks, where soldiers are trained... Wonder where they\'ve gone.', None, {6, 8, 17})
+RoomEight = Room(8, False, 'the procrastination room', '[Description placeholder]', None, {1, 7, 9})
+RoomNine = Room(9, False, 'the caboose', 'Apparently, a caboose is a place on a ship. You learn something new every day.', None, {8, 10, 18})
+RoomTen = Room(10, False, 'a public bathroom', 'Ew. This is a bathroom.', None, {2, 9, 11})
+RoomEleven = Room(11, False, 'storage', 'You look around at the contents of this storage room.', None, {10, 12, 19})
+RoomTwelve = Room(12, False, 'an office', 'You step into a drab, boring office.', None, {3, 11, 13})
 RoomThirteen = Room(13, False, 'the escape pod bay', 'Yes! This is it! The escape pod bay! Now we just need to get out of here! Come on, let\'s go!', None, {12, 14, 20})
-RoomFourteen = Room(14, False, 'The Cheese Factory', 'You are in the most famous part of the ship. A grand, looming, ominous industrial factory, the air thick with the sickening stench of melting cheese.\nEven while the ship falls apart, the cheese factory still stands, making cheese as ever it does.', 'DeBrie', {4, 13, 15})
+RoomFourteen = Room(14, False, 'The Cheese Factory', 'You are in the most famous part of the ship. A grand, looming, ominous industrial factory, the air thick with the sickening stench of melting cheese.\n  Even while the ship falls apart, the cheese factory still stands, making cheese as ever it does.', 'DeBrie', {4, 13, 15})
 RoomFifteen = Room(15, False, 'a grand hallway', 'This... is the biggest, most impressive, grandiose hallway you have ever seen. Why? It\'s just a hallway.', None, {6, 14, 16})
-RoomSixteen = Room(16, False, 'the server room', 'Description placeholder', None, {15, 17, 20})
-RoomSeventeen = Room(17, False, 'An office', 'Description placeholder', None, {7, 16, 18})
-RoomEighteen = Room(18, False, 'the medical bay', 'Description placeholder', None, {9, 17, 19})
-RoomNineteen = Room(19, False, 'a conference room', 'Description placeholder', None, {11, 18, 20})
+RoomSixteen = Room(16, False, 'the server room', 'Welcome to the server room. On your left, you can see the crushed computers. On the right, you\'ll find a row of burning devices.', None, {15, 17, 20})
+RoomSeventeen = Room(17, False, 'An office', 'You step into a drab, boring office.', None, {7, 16, 18})
+RoomEighteen = Room(18, False, 'the medical bay', 'You pause, momentarily, to consider healing yourself in the medbay. Alas, no time.', None, {9, 17, 19})
+RoomNineteen = Room(19, False, 'a conference room', 'This is where important people dressed in suits talk about this, and display powerpoint presentations of green and red arrows. At least, usually.', None, {11, 18, 20})
 RoomTwenty = Room(20, False, 'the bridge', 'You have found your way to the bridge, the central command centre of the ship. A vast and sterile room, once bustling with activity, now swaddles your footsteps with deafening silence.', None, {13, 16, 19})
 
 def forcemonstermove(): # Test and debug
@@ -278,10 +270,15 @@ else:
     clear = lambda : os.system('clear')
 playername = input('Enter name: ')
 clear()
+rooms = [RoomOne, RoomTwo, RoomThree, RoomFour, RoomFive, RoomSix, RoomSeven, RoomEight, RoomNine, RoomTen, RoomEleven, RoomTwelve, RoomThirteen, RoomFourteen, RoomFifteen, RoomSixteen, RoomSeventeen, RoomEighteen, RoomNineteen, RoomTwenty]
 # Main
 
 def main():
-    takenrooms = set({13})
+    for rume in rooms:
+        rume.breach = False
+        rume.item = None
+    RoomFourteen.item = 'DeBrie'
+    takenrooms = set({13, 14})
     realplayer = Player(random.randint(1, 20), set({'Mouldy cheese'}), 'This is you, '+playername, True, False, False, False, False, False) # Creating player
     takenrooms.add(realplayer.pos)
     variable = random.randint(1, 20) 
@@ -611,11 +608,12 @@ def main():
         '. . . . . . . . . ----- . . . . . . . . . . . . . . . . . . . . . ----- . . . . . . . . .\n'
         '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n')
         time.sleep(5)
-    print('A ruined spacecraft, drifting through the dark, illuminated by fires behind glass, and riddled with holes.\nInside, a survivor blinks their eyes open, and pushes against the wall, slowly making their way up to standing.\nThis is you. And you have to escape.')
+    print('A ruined spacecraft, drifting through the dark, illuminated by fires behind glass, and riddled with holes.\nInside, a survivor blinks their eyes open, and pushes against the wall, slowly making their way up to standing.\nTheir name is '+playername+'. This is you. And you have to escape.')
     print('"I have to get to the escape pods! Hopefully they aren\'t destroyed. Let\'s see which rooms I can move to..."\n[Tip: type "help"]')
     while True:
-        n = str(realplayer.pos)
         print('Current position: '+ str(realplayer.pos))
+        print('  '+ExampleRoom.roomfinder(realplayer.pos).name)
+        print('  '+ExampleRoom.roomfinder(realplayer.pos).desc+'\n')
         adjbreach = False
         for x in ExampleRoom.roomfinder(realplayer.pos).adj:
             if ExampleRoom.roomfinder(x).breach == True:
@@ -629,28 +627,32 @@ def main():
             print('"I hear sparks and whirring motors."')
         if realmonster.pos in ExampleRoom.roomfinder(realplayer.pos).adj:
             print('"I hear distant footsteps from the vents."')
-            if random.randint(1,2) == 1:
+            if realmonster.dest == realplayer.pos:
+                print('The footsteps stop suddenly, and you can hear a low growl.')
+            elif random.randint(1,2) == 1:
                 print('The footsteps stop suddenly, and you can hear a low growl.')
                 realmonster.dest = realplayer.pos
-        print('"I see signs on the walls, I think I can get to these rooms:"')
+        print('\n"I see signs on the walls, I think I can get to these rooms:"')
         for x in ExampleRoom.roomfinder(realplayer.pos).adj:
             print(str(x))
         if ExampleRoom.roomfinder(realplayer.pos).item == 'Energy cell':
-            print('"Is that something in the vent..?"')
+            print('\n"Is that something in the vent..?"')
         if ExampleRoom.roomfinder(realplayer.pos).item == 'Override key':
-            print('"Something is glinting up on that shelf."')
-        print('What will you do?')
+            print('\n"Something is glinting up on that shelf."')
+        print('\nWhat will you do?')
         inpt = input('')
         match inpt.lower().strip():
             case 'help':
                 print('help - shows this list.\nmove - asks you where to move, in the next line type which room you wish to move to.\ninventory - check your inventory. takes time.\nwait - take a little rest.\npickup - look for and pick up items. takes time.\nescape - get in an escape pod and save yourself again.') # Finish this please
                 input('Press enter to continue ')
+                clear()
                 continue
             case 'move':
-                x = input('Where? ') # Working on this
+                x = input('Where? ') 
                 if x == 'help':
-                    print('commands list') # Finish this please
+                    print('help - shows this list.\nmove - asks you where to move, in the next line type which room you wish to move to.\ninventory - check your inventory. takes time.\nwait - take a little rest.\npickup - look for and pick up items. takes time.\nescape - get in an escape pod and save yourself again.') # Finish this please
                     input('Press enter to continue ')
+                    clear()
                     continue
                 else:
                     try:
@@ -678,6 +680,7 @@ def main():
                     time.sleep(20)
                     break
                 elif realplayer.esc == False:
+                    time.sleep(5)
                     continue
             case _:
                 print('Input not understood.\n[Tip: type "help"]')
@@ -692,6 +695,8 @@ def main():
         if realplayer.alive == False:
             time.sleep(10)
             break
+        input('Press enter ')
+        clear()
     clear()
     time.sleep(3)
     print('...drifting through blackness...')
@@ -705,6 +710,6 @@ while True:
 
 '''Bugs
 
-Possible solutions implemented: Errors don't clear the screen.
+Possible solutions implemented: Not being warned of secbot
 
-Unpatched: Username not used often enough. No room descriptions given.'''
+Unpatched: '''
